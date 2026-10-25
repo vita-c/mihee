@@ -153,11 +153,11 @@ export function LectureEditor({
                 {lecture.schedule.map((r, i) => (
                   <div key={r.id} className="flex items-center gap-2">
                     <span className="w-6 text-right text-sm text-ink-500">{i + 1}</span>
-                    <input className={inputClass} value={r.label} onChange={(e) => setRow(r.id, { label: e.target.value })} placeholder="예: 도입 · 아이스브레이킹" />
+                    <input className={`${inputClass} min-w-0 flex-1`} value={r.label} onChange={(e) => setRow(r.id, { label: e.target.value })} placeholder="예: 도입 · 아이스브레이킹" />
                     <input
                       type="number"
                       min={0}
-                      className={`${inputClass} w-20 shrink-0`}
+                      className={`${inputClass.replace("w-full", "")} w-20 shrink-0`}
                       value={r.minutes}
                       onChange={(e) => setRow(r.id, { minutes: Math.max(0, Number(e.target.value) || 0) })}
                     />

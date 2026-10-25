@@ -1,36 +1,22 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍎🌸 사과꽃 강의실
 
-## Getting Started
+강의 요청이 오면 카드 하나에 **강의 정보 → 커리큘럼(교육목표 · 교육흐름 · 타임스케줄 · 기대효과) → PPT 구성**을 이어서 준비하는 소프트웨어예요.
 
-First, run the development server:
-
+## 여는 법
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+브라우저에서 http://localhost:3000 을 열어요.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 쓰는 법
+1. **새 강의**를 눌러 강의처 · 키워드 · 대상 · 총 시간을 적어요.
+2. **내 자료 서랍**에 강사 소개 · 사례 · 지난 커리큘럼 · 실습 아이디어를 넣어 두고, 강의 카드 오른쪽에서 체크해요.
+3. **🍃 Claude에게 보내기** 버튼을 누르고 Claude 창에 붙여 넣어요. 받은 답은 카드에 붙여 넣어 저장해요. 타임스케줄 합계는 자동으로 계산돼요.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 데이터
+- 이 컴퓨터의 브라우저 안(localStorage)에만 저장돼요. 밖으로 보내지 않아요.
+- 브라우저 기록을 지우면 같이 지워질 수 있어요. **백업** 메뉴에서 가끔 내보내기 해 두세요.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+- 스폰지클럽 4기 「나만의 소프트웨어」 스킬(젬마 · 비비안)로 PRD부터 만들었어요
+- 스폰지클럽 4기에서 만들었어요
