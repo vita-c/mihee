@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fffaf7;
+  --foreground: #3b2f2f;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-blossom-50: #fff1f3;
+  --color-blossom-100: #fde3e7;
+  --color-blossom-200: #f8c8d0;
+  --color-blossom-500: #d9677c;
+  --color-blossom-700: #a8435a;
+  --color-leaf-50: #f2f8ee;
+  --color-leaf-100: #e1efd8;
+  --color-leaf-300: #a9cf94;
+  --color-leaf-600: #5b8c46;
+  --color-leaf-800: #3d5f2f;
+  --color-ink-500: #8a7a76;
+  --font-sans: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
