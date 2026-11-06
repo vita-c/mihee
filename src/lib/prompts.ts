@@ -18,7 +18,11 @@ function lectureInfo(l: Lecture) {
 
 function curriculumText(l: Lecture) {
   const schedule = l.schedule.length
-    ? l.schedule.map((r) => `  - ${or(r.label, "(이름 없음)")} · ${r.minutes}분`).join("\n") + `\n  (합계 ${scheduleTotal(l)}분)`
+    ? l.schedule
+        .map((r) =>
+          [`  - ${or(r.label, "(이름 없음)")} · ${r.minutes}분`, ...r.subs.filter((s) => s.trim()).map((s) => `      · ${s.trim()}`)].join("\n"),
+        )
+        .join("\n") + `\n  (합계 ${scheduleTotal(l)}분)`
     : "  (아직 비어 있음)";
   return [
     `[교육목표]\n${or(l.goal)}`,
@@ -54,7 +58,7 @@ ${materialsText(materials)}
 1. 강의 제목 후보 3개
 2. 교육목표 (3줄 이내)
 3. 교육흐름 (도입 → 전개 → 정리)
-4. 타임스케줄: 총 ${l.totalMinutes}분에 정확히 맞게, "활동 이름 · 분" 형식으로
+4. 타임스케줄: 총 ${l.totalMinutes}분에 정확히 맞게, 시간마다 "큰 제목 · 분" 한 줄과 그 아래 소제목 2개
 5. 기대효과 (3줄 이내)
 내 자료에 없는 경력이나 숫자는 지어내지 말고, 필요하면 [확인 필요]라고 표시해 줘.`;
 }

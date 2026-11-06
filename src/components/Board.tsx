@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Lecture, curriculumDone, pptDone } from "@/lib/storage";
 import { Button, inputClass } from "./ui";
+import { CalendarImport } from "./CalendarImport";
 
 function Badge({ done, label }: { done: boolean; label: string }) {
   return (
@@ -21,25 +22,36 @@ export function Board({
   lectures,
   onOpen,
   onNew,
+  onImport,
 }: {
   lectures: Lecture[];
   onOpen: (id: string) => void;
   onNew: () => void;
+  onImport: (l: Lecture[]) => void;
 }) {
   const [q, setQ] = useState("");
+  const [cal, setCal] = useState(false);
+  const calendar = cal && <CalendarImport lectures={lectures} onImport={onImport} onClose={() => setCal(false)} />;
+  const calButton = (
+    <Button variant="soft" onClick={() => setCal(true)}>
+      📅 캘린더에서 가져오기
+    </Button>
+  );
 
   if (lectures.length === 0) {
     return (
       <div className="mx-auto mt-16 max-w-md rounded-3xl border border-blossom-200 bg-white p-8 text-center">
+        {calendar}
         <div className="text-5xl">🌸</div>
         <h2 className="mt-4 text-xl font-bold">강의 요청이 오면 여기에 카드로 모아요</h2>
         <p className="mt-2 text-sm text-ink-500">
           키워드와 시간을 넣으면 커리큘럼부터 PPT 구성까지
           <br />한 카드 안에서 이어서 준비할 수 있어요.
         </p>
-        <Button className="mt-6" onClick={onNew}>
-          + 첫 강의 만들기
-        </Button>
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <Button onClick={onNew}>+ 첫 강의 만들기</Button>
+          {calButton}
+        </div>
       </div>
     );
   }
@@ -53,6 +65,7 @@ export function Board({
 
   return (
     <div>
+      {calendar}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <input
           className={`${inputClass} sm:max-w-xs`}
@@ -60,9 +73,10 @@ export function Board({
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
-        <Button onClick={onNew} className="sm:ml-auto">
-          + 새 강의
-        </Button>
+        <div className="flex gap-2 sm:ml-auto">
+          {calButton}
+          <Button onClick={onNew}>+ 새 강의</Button>
+        </div>
       </div>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

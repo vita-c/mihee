@@ -2,11 +2,12 @@
 
 import { useRef, useState } from "react";
 import { Store, parseStore } from "@/lib/storage";
-import { Button } from "./ui";
+import { Button, useConfirm } from "./ui";
 
-export function Settings({ store, onImport }: { store: Store; onImport: (s: Store) => void }) {
+export function Settings({ store, onImport, dataFile }: { store: Store; onImport: (s: Store) => void; dataFile: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState("");
+  const { ask, dialog } = useConfirm();
 
   function exportFile() {
     const blob = new Blob([JSON.stringify(store, null, 2)], { type: "application/json" });
@@ -26,8 +27,9 @@ export function Settings({ store, onImport }: { store: Store; onImport: (s: Stor
         setMsg("백업 파일이 아니에요.");
         return;
       }
-      const ok = window.confirm(
-        `강의 ${parsed.lectures.length}개 · 내 자료 ${parsed.materials.length}개를 불러올게요. 지금 기록은 이걸로 바뀌어요. 계속할까요?`,
+      const ok = await ask(
+        `강의 ${parsed.lectures.length}개 · 내 자료 ${parsed.materials.length}개를 불러올게요.\n지금 기록은 이걸로 바뀌어요. 계속할까요?`,
+        "불러오기",
       );
       if (!ok) return;
       onImport(parsed);
@@ -39,10 +41,17 @@ export function Settings({ store, onImport }: { store: Store; onImport: (s: Stor
 
   return (
     <div className="max-w-xl">
+      {dialog}
       <h2 className="text-xl font-bold">백업</h2>
-      <p className="mt-2 text-sm text-ink-500">
-        기록은 이 컴퓨터의 브라우저 안에 저장돼요. 브라우저 기록을 지우면 같이 지워질 수 있어서, 가끔 내보내기를 해 두면 안전해요.
-        다른 컴퓨터로 옮길 때도 이 파일을 쓰면 돼요.
+      <div className="mt-3 rounded-2xl border border-leaf-300 bg-leaf-50 p-4 text-sm">
+        <div className="font-semibold text-leaf-800">💾 기록은 이 컴퓨터의 파일에 저장돼요</div>
+        <p className="mt-1 break-all text-ink-500">{dataFile || "(파일 위치를 아직 못 읽었어요)"}</p>
+        <p className="mt-2 text-xs text-ink-500">
+          고칠 때마다 자동으로 저장되고, 하루에 한 번 같은 폴더의 <b>backups</b> 에 그날 기록이 복사돼요(30일치). OneDrive 폴더에 있으면 클라우드에도 자동으로 올라가요.
+        </p>
+      </div>
+      <p className="mt-4 text-sm text-ink-500">
+        아래 내보내기는 기록을 따로 한 벌 더 받아 두거나, 다른 컴퓨터로 옮길 때 써요.
       </p>
       <div className="mt-5 flex flex-wrap gap-2">
         <Button onClick={exportFile}>⬇ 파일로 내보내기</Button>
