@@ -1,7 +1,7 @@
 // 「Claude에게 보내기」 버튼이 복사하는 요청 문장을 만들어요.
 // 강의 정보 + 지금까지 쓴 커리큘럼 + 고른 내 자료를 한 번에 묶어서, 앞 내용을 다시 설명하지 않게 해요.
 
-import { Lecture, Material, MATERIAL_KINDS, scheduleTotal } from "./storage";
+import { Lecture, Material, MATERIAL_KINDS, formatMinutes, prepMinutes, scheduleTotal } from "./storage";
 
 const or = (v: string, fallback = "(아직 비어 있음)") => (v.trim() ? v.trim() : fallback);
 
@@ -42,7 +42,25 @@ function materialsText(materials: Material[]) {
     .join("\n\n");
 }
 
-export function curriculumPrompt(l: Lecture, materials: Material[]) {
+// 5회차 v3: 「지난 강의에서 불러오기」로 고른 강의의 수업 로그를 Claude에게도 같이 보내요.
+// 비어 있으면 "" (보내는 글에 덩어리를 넣지 않아요)
+export function learnedText(src: Lecture | null | undefined) {
+  if (!src) return "";
+  const { log } = src;
+  const mins = prepMinutes(log);
+  const lines = [
+    mins !== null ? `- 준비 시간: ${formatMinutes(mins)}` : "",
+    log.axis.trim() ? `- 축(가장 중요하게 잡은 것): ${log.axis.trim()}` : "",
+    log.after.trim() ? `- 수업 후:\n${log.after.trim().split("\n").map((x) => `  ${x}`).join("\n")}` : "",
+    log.rejected.trim() ? `- 제친 것: ${log.rejected.trim()}` : "",
+  ].filter(Boolean);
+  if (!lines.length) return "";
+  return `## 지난 수업에서 배운 것 (「${or(src.title || src.keyword, "지난 강의")}」의 수업 로그 · 이번 커리큘럼에 반영해 줘)
+${lines.join("\n")}\n\n`;
+}
+
+export function curriculumPrompt(l: Lecture, materials: Material[], learnedFrom?: Lecture | null) {
+  const learned = learnedText(learnedFrom);
   return `강의 커리큘럼 초안을 같이 만들어 줘. 나는 대학 강의와 교육과정을 만드는 강사야.
 
 ## 강의 정보
@@ -54,13 +72,13 @@ ${curriculumText(l)}
 ## 내 자료 (내 경력과 사례를 살려서 써 줘)
 ${materialsText(materials)}
 
-## 부탁
+${learned}## 부탁
 1. 강의 제목 후보 3개
 2. 교육목표 (3줄 이내)
 3. 교육흐름 (도입 → 전개 → 정리)
 4. 타임스케줄: 총 ${l.totalMinutes}분에 정확히 맞게, 시간마다 "큰 제목 · 분" 한 줄과 그 아래 소제목 2개
 5. 기대효과 (3줄 이내)
-내 자료에 없는 경력이나 숫자는 지어내지 말고, 필요하면 [확인 필요]라고 표시해 줘.`;
+${learned ? "6. 「지난 수업에서 배운 것」을 어디에 어떻게 반영했는지 한 줄씩\n" : ""}내 자료에 없는 경력이나 숫자는 지어내지 말고, 필요하면 [확인 필요]라고 표시해 줘.`;
 }
 
 export function pptPrompt(l: Lecture, materials: Material[]) {

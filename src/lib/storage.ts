@@ -50,6 +50,30 @@ export type Slide = {
   notes: string;
 };
 
+// 수업 로그 (5회차 v2 · 코엘의 「수업 로그 여섯 줄」 힌트)
+// 준비 시작 · 초안 완료는 "YYYY-MM-DDTHH:mm"(이 컴퓨터 시각), 비어 있으면 ""
+export type LectureLog = {
+  prepStart: string;
+  draftDone: string;
+  adopted: string; // 채택: 이번에 고른 구성 · 방향
+  rejected: string; // 제친 것: 고민하다 뺀 것과 이유
+  axis: string; // 축: 이번 강의에서 가장 중요하게 잡은 것
+  after: string; // 수업 후: 매끄럽지 않았던 것 · 예상과 달랐던 것 · 다음엔
+};
+
+export const blankLog = (): LectureLog => ({ prepStart: "", draftDone: "", adopted: "", rejected: "", axis: "", after: "" });
+
+// 준비 시작 → 초안 완료까지 걸린 분. 둘 중 하나라도 없거나 거꾸로면 null
+export function prepMinutes(log: LectureLog): number | null {
+  if (!log.prepStart || !log.draftDone) return null;
+  const a = new Date(log.prepStart).getTime();
+  const b = new Date(log.draftDone).getTime();
+  if (!Number.isFinite(a) || !Number.isFinite(b) || b < a) return null;
+  return Math.round((b - a) / 60000);
+}
+
+export const formatMinutes = (m: number) => (m >= 60 ? `${Math.floor(m / 60)}시간${m % 60 ? ` ${m % 60}분` : ""}` : `${m}분`);
+
 export type Lecture = {
   id: string;
   org: string;
@@ -67,6 +91,7 @@ export type Lecture = {
   pptTheme: string;
   slides: Slide[];
   materialIds: string[];
+  log: LectureLog;
   calendarId: string; // 캘린더에서 가져온 카드면 그 일정 번호 (같은 일정을 두 번 가져오지 않게)
   updatedAt: string;
 };
@@ -185,6 +210,19 @@ function cleanMaterial(v: unknown): Material | null {
   return { id: v.id, kind, title: str(v.title, 200), body: str(v.body), ...(fileName ? { fileName } : {}) };
 }
 
+function cleanLog(v: unknown): LectureLog {
+  if (!isObj(v)) return blankLog();
+  const time = (x: unknown) => (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(str(x, 16)) ? str(x, 16) : "");
+  return {
+    prepStart: time(v.prepStart),
+    draftDone: time(v.draftDone),
+    adopted: str(v.adopted),
+    rejected: str(v.rejected),
+    axis: str(v.axis, 500),
+    after: str(v.after),
+  };
+}
+
 function cleanLecture(v: unknown): Lecture | null {
   if (!isObj(v) || typeof v.id !== "string") return null;
   const schedule = Array.isArray(v.schedule)
@@ -224,6 +262,7 @@ function cleanLecture(v: unknown): Lecture | null {
         }))
       : [],
     materialIds,
+    log: cleanLog(v.log),
     calendarId: str(v.calendarId, 300),
     updatedAt: str(v.updatedAt, 40),
   };
@@ -355,6 +394,7 @@ export function blankLecture(): Lecture {
     pptTheme: "blossom",
     slides: [],
     materialIds: [],
+    log: blankLog(),
     calendarId: "",
     updatedAt: new Date().toISOString(),
   };

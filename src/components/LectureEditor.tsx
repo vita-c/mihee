@@ -2,7 +2,7 @@
 
 import { Lecture, Material, MATERIAL_KINDS, ScheduleRow, newId, padSubs, scheduleTotal } from "@/lib/storage";
 import { useState } from "react";
-import { curriculumPrompt, pptPrompt } from "@/lib/prompts";
+import { curriculumPrompt, learnedText, pptPrompt } from "@/lib/prompts";
 import { titleIdeas } from "@/lib/titleIdeas";
 import { ScheduleOption, TextField, curriculumDraft, scheduleOptions, textOptions } from "@/lib/curriculumDraft";
 import { curriculumDoc, docFileName } from "@/lib/curriculumDoc";
@@ -12,6 +12,7 @@ import { printCurriculum } from "@/lib/exportPdf";
 import { download } from "@/lib/zipWrite";
 import { Button, CopyButton, Field, inputClass, useConfirm } from "./ui";
 import { PptSection } from "./PptSection";
+import { LastLearned, LogSection } from "./LogSection";
 
 const area = `${inputClass} min-h-28 resize-y leading-relaxed`;
 
@@ -53,6 +54,7 @@ export function LectureEditor({
   const canRegen = Boolean(lecture.keyword.trim());
   const [saveMsg, setSaveMsg] = useState("");
   const { ask, dialog } = useConfirm();
+  const [learnedFrom, setLearnedFrom] = useState<Lecture | null>(null);
 
   async function saveDoc(kind: "hwpx" | "docx" | "pdf") {
     const doc = curriculumDoc(lecture);
@@ -141,6 +143,7 @@ export function LectureEditor({
   async function loadFrom(id: string) {
     const src = others.find((o) => o.id === id);
     if (!src) return;
+    setLearnedFrom(src);
     const hasContent = lecture.goal || lecture.flow || lecture.effect || lecture.schedule.length;
     if (hasContent && !(await ask("지금 쓴 커리큘럼을 지난 강의 내용으로 바꿀까요?", "바꾸기"))) return;
     onChange({
@@ -239,8 +242,11 @@ export function LectureEditor({
               </span>
             </div>
             <div className="flex flex-col gap-2 rounded-xl bg-leaf-50 p-3 sm:flex-row sm:items-center">
-              <CopyButton label="🍃 Claude에게 보내기 · 커리큘럼 초안 부탁" getText={() => curriculumPrompt(lecture, picked)} />
-              <span className="text-xs text-leaf-800">강의 정보 + 쓴 칸 + 고른 내 자료 {picked.length}개가 함께 복사돼요</span>
+              <CopyButton label="🍃 Claude에게 보내기 · 커리큘럼 초안 부탁" getText={() => curriculumPrompt(lecture, picked, learnedFrom)} />
+              <span className="text-xs text-leaf-800">
+                강의 정보 + 쓴 칸 + 고른 내 자료 {picked.length}개
+                {learnedFrom && learnedText(learnedFrom) ? " + 지난번에 배운 것" : ""}이 함께 복사돼요
+              </span>
             </div>
             {others.length > 0 && (
               <Field label="지난 강의에서 불러오기" hint="목표 · 흐름 · 시간표 · 기대효과를 가져와요">
@@ -254,6 +260,7 @@ export function LectureEditor({
                 </select>
               </Field>
             )}
+            {learnedFrom && <LastLearned src={learnedFrom} onClose={() => setLearnedFrom(null)} />}
             {textBlock("goal", "교육목표")}
             {textBlock("flow", "교육흐름")}
 
@@ -400,6 +407,10 @@ export function LectureEditor({
             <Field label="Claude 구성안 메모" hint="Claude가 준 구성안을 붙여 넣어 두는 칸이에요">
               <textarea className={`${area} min-h-32`} value={lecture.ppt} onChange={(e) => set("ppt", e.target.value)} />
             </Field>
+          </Section>
+
+          <Section step="4" title="📒 수업 로그">
+            <LogSection lecture={lecture} onChange={onChange} />
           </Section>
         </div>
 
